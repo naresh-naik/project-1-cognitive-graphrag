@@ -233,8 +233,12 @@ def test_synthesizer_node_returns_answer():
 def test_synthesizer_node_returns_fallback_on_failure():
     client = MagicMock(spec=LLMClient)
     client.chat_completion.side_effect = RuntimeError("API error")
-    state = _make_state(query="What is GraphRAG?")
+    state = _make_state(
+        query="What is GraphRAG?",
+        combined_context="GraphRAG combines knowledge graphs with RAG.",
+    )
 
     result = synthesizer_node(state, client, "gpt-4o-mini")
 
-    assert result["response"] == "Synthesis failed. Please inspect server logs."
+    assert "LLM synthesis unavailable" in result["response"]
+    assert "GraphRAG combines knowledge graphs with RAG." in result["response"]

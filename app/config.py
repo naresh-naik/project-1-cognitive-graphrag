@@ -13,6 +13,10 @@ class Settings(BaseSettings):
     HF_BASE_URL: str = "https://router.huggingface.co/v1"
     HF_MODEL_NAME: str = "meta-llama/Llama-3.1-8B-Instruct"
 
+    GROQ_API_KEY: str = ""
+    GROQ_BASE_URL: str = "https://api.groq.com/openai/v1"
+    GROQ_MODEL_NAME: str = "llama3-8b-8192"
+
     EMBEDDING_PROVIDER: str = "openai"
     EMBEDDING_MODEL_NAME: str = "text-embedding-3-small"
     SENTENCE_TRANSFORMER_MODEL: str = "sentence-transformers/all-MiniLM-L6-v2"

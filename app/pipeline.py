@@ -44,6 +44,9 @@ class CognitiveGraphRAGPipeline:
             hf_api_token=settings.HF_API_TOKEN,
             hf_base_url=settings.HF_BASE_URL,
             hf_model_name=settings.HF_MODEL_NAME,
+            groq_api_key=settings.GROQ_API_KEY,
+            groq_base_url=settings.GROQ_BASE_URL,
+            groq_model_name=settings.GROQ_MODEL_NAME,
         )
 
         self.embedding_client = EmbeddingClient(

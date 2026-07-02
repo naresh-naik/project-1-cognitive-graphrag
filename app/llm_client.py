@@ -20,16 +20,26 @@ class LLMClient:
         hf_api_token: str,
         hf_base_url: str,
         hf_model_name: str,
+        groq_api_key: str = "",
+        groq_base_url: str = "https://api.groq.com/openai/v1",
+        groq_model_name: str = "llama3-8b-8192",
     ):
         self.provider = provider.lower()
-        self.model_name = openai_model_name if self.provider == "openai" else hf_model_name
 
         if self.provider == "openai":
+            self.model_name = openai_model_name
             self.client = OpenAI(api_key=openai_api_key)
         elif self.provider == "huggingface":
+            self.model_name = hf_model_name
             self.client = OpenAI(
                 base_url=hf_base_url,
                 api_key=hf_api_token,
+            )
+        elif self.provider == "groq":
+            self.model_name = groq_model_name
+            self.client = OpenAI(
+                base_url=groq_base_url,
+                api_key=groq_api_key,
             )
         else:
             raise ValueError(f"Unsupported LLM provider: {provider}")
