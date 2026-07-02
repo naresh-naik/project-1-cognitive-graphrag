@@ -1,5 +1,5 @@
 import hashlib
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
 from openai import OpenAI
 from qdrant_client import QdrantClient
@@ -14,10 +14,12 @@ class CognitiveVectorStore:
         collection_name: str,
         openai_api_key: str,
         embedding_model: str,
+        embedding_client: Optional[Any] = None,
     ):
         self.client = QdrantClient(host=host, port=port)
         self.collection_name = collection_name
-        self.openai_client = OpenAI(api_key=openai_api_key)
+        self.embedding_client = embedding_client
+        self.openai_api_key = openai_api_key
         self.embedding_model = embedding_model
         self._ensure_collection()
 
@@ -35,7 +37,10 @@ class CognitiveVectorStore:
             )
 
     def get_embedding(self, text: str) -> List[float]:
-        response = self.openai_client.embeddings.create(
+        if self.embedding_client is not None:
+            return self.embedding_client.embed([text.replace("\n", " ")])[0]
+
+        response = OpenAI(api_key=self.openai_api_key).embeddings.create(
             model=self.embedding_model,
             input=[text.replace("\n", " ")],
         )

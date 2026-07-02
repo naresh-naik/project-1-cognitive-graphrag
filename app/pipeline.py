@@ -7,9 +7,11 @@ from pydantic import BaseModel, Field
 
 from app.agents.graph_builder import build_workflow
 from app.config import settings
+from app.embeddings import EmbeddingClient
 from app.graph_store import CognitiveGraphStore
 from app.in_memory_graph_store import InMemoryCognitiveGraphStore
 from app.in_memory_vector_store import InMemoryCognitiveVectorStore
+from app.llm_client import LLMClient
 from app.vector_store import CognitiveVectorStore
 
 logger = logging.getLogger(__name__)
@@ -35,7 +37,21 @@ class KnowledgeGraphExtraction(BaseModel):
 
 class CognitiveGraphRAGPipeline:
     def __init__(self):
-        self.openai_client = OpenAI(api_key=settings.OPENAI_API_KEY)
+        self.llm_client = LLMClient(
+            provider=settings.LLM_PROVIDER,
+            openai_api_key=settings.OPENAI_API_KEY,
+            openai_model_name=settings.OPENAI_MODEL_NAME,
+            hf_api_token=settings.HF_API_TOKEN,
+            hf_base_url=settings.HF_BASE_URL,
+            hf_model_name=settings.HF_MODEL_NAME,
+        )
+
+        self.embedding_client = EmbeddingClient(
+            provider=settings.EMBEDDING_PROVIDER,
+            openai_api_key=settings.OPENAI_API_KEY,
+            openai_model=settings.EMBEDDING_MODEL_NAME,
+            sentence_transformer_model=settings.SENTENCE_TRANSFORMER_MODEL,
+        )
 
         use_in_memory = os.environ.get("USE_IN_MEMORY_STORES", "").lower() in ("1", "true", "yes")
 
@@ -44,6 +60,7 @@ class CognitiveGraphRAGPipeline:
             self.vector_store = InMemoryCognitiveVectorStore(
                 openai_api_key=settings.OPENAI_API_KEY,
                 embedding_model=settings.EMBEDDING_MODEL_NAME,
+                embedding_client=self.embedding_client,
             )
         else:
             self.graph_store = CognitiveGraphStore(
@@ -58,11 +75,12 @@ class CognitiveGraphRAGPipeline:
                 collection_name=settings.QDRANT_COLLECTION,
                 openai_api_key=settings.OPENAI_API_KEY,
                 embedding_model=settings.EMBEDDING_MODEL_NAME,
+                embedding_client=self.embedding_client,
             )
 
         self.workflow = build_workflow(
-            openai_client=self.openai_client,
-            model_name=settings.OPENAI_MODEL_NAME,
+            llm_client=self.llm_client,
+            model_name=self.llm_client.model_name,
             vector_store=self.vector_store,
             graph_store=self.graph_store,
         )
@@ -99,19 +117,16 @@ Text:
 """
 
         try:
-            completion = self.openai_client.beta.chat.completions.parse(
-                model=settings.OPENAI_MODEL_NAME,
+            return self.llm_client.chat_completion(
                 messages=[
                     {
                         "role": "system",
-                        "content": "You extract entities and relationships for a Neo4j knowledge graph.",
+                        "content": "You extract entities and relationships for a Neo4j knowledge graph. Return only valid JSON matching the schema.",
                     },
                     {"role": "user", "content": prompt},
                 ],
                 response_format=KnowledgeGraphExtraction,
             )
-
-            return completion.choices[0].message.parsed
 
         except Exception as error:
             logger.exception("Graph extraction failed: %s", error)

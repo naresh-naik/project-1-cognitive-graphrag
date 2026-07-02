@@ -1,7 +1,7 @@
 import hashlib
 import logging
 import math
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
 from openai import OpenAI
 
@@ -31,10 +31,12 @@ class InMemoryCognitiveVectorStore:
         *_args,
         openai_api_key: str,
         embedding_model: str,
+        embedding_client: Optional[Any] = None,
         **_kwargs,
     ):
-        self.openai_client = OpenAI(api_key=openai_api_key)
+        self.openai_api_key = openai_api_key
         self.embedding_model = embedding_model
+        self.embedding_client = embedding_client
         self.points: List[Dict[str, Any]] = []
         logger.info("Using in-memory vector store.")
 
@@ -42,7 +44,10 @@ class InMemoryCognitiveVectorStore:
         pass
 
     def get_embedding(self, text: str) -> List[float]:
-        response = self.openai_client.embeddings.create(
+        if self.embedding_client is not None:
+            return self.embedding_client.embed([text.replace("\n", " ")])[0]
+
+        response = OpenAI(api_key=self.openai_api_key).embeddings.create(
             model=self.embedding_model,
             input=[text.replace("\n", " ")],
         )

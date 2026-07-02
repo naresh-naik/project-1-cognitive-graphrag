@@ -1,4 +1,4 @@
-"""Unit tests for agent nodes with mocked OpenAI clients."""
+"""Unit tests for agent nodes with mocked LLM clients."""
 
 from unittest.mock import MagicMock
 
@@ -13,6 +13,7 @@ from app.agents.router import QueryRoutingDecision, query_router_node
 from app.agents.rewriter import QueryRewriteDecision, query_rewriter_node
 from app.agents.state import AgentState
 from app.agents.synthesizer import synthesizer_node
+from app.llm_client import LLMClient
 
 
 def _make_state(**overrides) -> AgentState:
@@ -37,31 +38,23 @@ def _make_state(**overrides) -> AgentState:
 
 
 def _mock_parsed_client(parsed):
-    """Return a MagicMock OpenAI client whose beta.chat.completions.parse returns parsed."""
-    client = MagicMock()
-    completion = MagicMock()
-    completion.choices = [MagicMock(message=MagicMock(parsed=parsed))]
-    client.beta.chat.completions.parse.return_value = completion
+    """Return a MagicMock LLMClient whose chat_completion returns parsed."""
+    client = MagicMock(spec=LLMClient)
+    client.chat_completion.return_value = parsed
     return client
 
 
 def _mock_parsed_client_sequence(decisions):
-    """Return a mock client whose beta.chat.completions.parse yields each decision in order."""
-    client = MagicMock()
-    completions = [
-        MagicMock(choices=[MagicMock(message=MagicMock(parsed=decision))])
-        for decision in decisions
-    ]
-    client.beta.chat.completions.parse.side_effect = completions
+    """Return a mock LLMClient whose chat_completion yields each decision in order."""
+    client = MagicMock(spec=LLMClient)
+    client.chat_completion.side_effect = decisions
     return client
 
 
 def _mock_chat_client(content: str):
-    """Return a MagicMock OpenAI client whose chat.completions.create returns content."""
-    client = MagicMock()
-    completion = MagicMock()
-    completion.choices = [MagicMock(message=MagicMock(content=content))]
-    client.chat.completions.create.return_value = completion
+    """Return a MagicMock LLMClient whose chat_completion returns content."""
+    client = MagicMock(spec=LLMClient)
+    client.chat_completion.return_value = content
     return client
 
 
@@ -79,12 +72,12 @@ def test_router_node_returns_vector_route():
     assert result["route"] == "vector_search"
     assert result["extracted_entities"] == ["GraphRAG"]
     assert result["loop_count"] == 1
-    client.beta.chat.completions.parse.assert_called_once()
+    client.chat_completion.assert_called_once()
 
 
 def test_router_node_defaults_to_hybrid_on_failure():
-    client = MagicMock()
-    client.beta.chat.completions.parse.side_effect = RuntimeError("API error")
+    client = MagicMock(spec=LLMClient)
+    client.chat_completion.side_effect = RuntimeError("API error")
     state = _make_state(loop_count=2)
 
     result = query_router_node(state, client, "gpt-4o-mini")
@@ -130,8 +123,8 @@ def test_context_grader_node_returns_irrelevant():
 
 
 def test_context_grader_node_defaults_to_relevant_on_failure():
-    client = MagicMock()
-    client.beta.chat.completions.parse.side_effect = RuntimeError("API error")
+    client = MagicMock(spec=LLMClient)
+    client.chat_completion.side_effect = RuntimeError("API error")
     state = _make_state(vector_context=[{"text": "Some context."}])
 
     result = context_grader_node(state, client, "gpt-4o-mini")
@@ -150,7 +143,6 @@ def test_generation_grader_node_grounded_and_useful():
         answers_query=True,
     )
     client = _mock_parsed_client_sequence([hallucination_decision, answer_decision])
-    parse_mock = client.beta.chat.completions.parse
 
     state = _make_state(
         query="What is GraphRAG?",
@@ -162,7 +154,7 @@ def test_generation_grader_node_grounded_and_useful():
 
     assert result["hallucination_score"] == "no"
     assert result["answer_score"] == "yes"
-    assert parse_mock.call_count == 2
+    assert client.chat_completion.call_count == 2
 
 
 def test_generation_grader_node_not_grounded_not_useful():
@@ -175,7 +167,6 @@ def test_generation_grader_node_not_grounded_not_useful():
         answers_query=False,
     )
     client = _mock_parsed_client_sequence([hallucination_decision, answer_decision])
-    parse_mock = client.beta.chat.completions.parse
 
     state = _make_state(
         query="What is GraphRAG?",
@@ -187,18 +178,18 @@ def test_generation_grader_node_not_grounded_not_useful():
 
     assert result["hallucination_score"] == "yes"
     assert result["answer_score"] == "no"
-    assert parse_mock.call_count == 2
+    assert client.chat_completion.call_count == 2
 
 
 def test_generation_grader_node_empty_response():
-    client = MagicMock()
+    client = MagicMock(spec=LLMClient)
     state = _make_state(query="What is GraphRAG?", response="")
 
     result = generation_grader_node(state, client, "gpt-4o-mini")
 
     assert result["hallucination_score"] == "yes"
     assert result["answer_score"] == "no"
-    client.beta.chat.completions.parse.assert_not_called()
+    client.chat_completion.assert_not_called()
 
 
 def test_query_rewriter_node_returns_rewritten_query():
@@ -216,8 +207,8 @@ def test_query_rewriter_node_returns_rewritten_query():
 
 
 def test_query_rewriter_node_defaults_to_original_on_failure():
-    client = MagicMock()
-    client.beta.chat.completions.parse.side_effect = RuntimeError("API error")
+    client = MagicMock(spec=LLMClient)
+    client.chat_completion.side_effect = RuntimeError("API error")
     state = _make_state(query="GraphRAG benefits", loop_count=0)
 
     result = query_rewriter_node(state, client, "gpt-4o-mini")
@@ -236,12 +227,12 @@ def test_synthesizer_node_returns_answer():
     result = synthesizer_node(state, client, "gpt-4o-mini")
 
     assert result["response"] == "GraphRAG combines knowledge graphs with retrieval-augmented generation."
-    client.chat.completions.create.assert_called_once()
+    client.chat_completion.assert_called_once()
 
 
 def test_synthesizer_node_returns_fallback_on_failure():
-    client = MagicMock()
-    client.chat.completions.create.side_effect = RuntimeError("API error")
+    client = MagicMock(spec=LLMClient)
+    client.chat_completion.side_effect = RuntimeError("API error")
     state = _make_state(query="What is GraphRAG?")
 
     result = synthesizer_node(state, client, "gpt-4o-mini")

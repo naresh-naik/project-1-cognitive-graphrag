@@ -1,10 +1,10 @@
 import logging
 from typing import List, Literal
 
-from openai import OpenAI
 from pydantic import BaseModel, Field
 
 from app.agents.state import AgentState
+from app.llm_client import LLMClient
 
 logger = logging.getLogger(__name__)
 
@@ -22,7 +22,7 @@ class QueryRoutingDecision(BaseModel):
 
 def query_router_node(
     state: AgentState,
-    openai_client: OpenAI,
+    llm_client: LLMClient,
     model_name: str,
 ) -> dict:
     query = state["query"]
@@ -42,19 +42,16 @@ Query:
 """
 
     try:
-        completion = openai_client.beta.chat.completions.parse(
-            model=model_name,
+        decision = llm_client.chat_completion(
             messages=[
                 {
                     "role": "system",
-                    "content": "You are a query router for a GraphRAG system.",
+                    "content": "You are a query router for a GraphRAG system. Return only valid JSON matching the schema.",
                 },
                 {"role": "user", "content": prompt},
             ],
             response_format=QueryRoutingDecision,
         )
-
-        decision = completion.choices[0].message.parsed
 
         return {
             "route": decision.route,

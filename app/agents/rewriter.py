@@ -1,9 +1,9 @@
 import logging
 
-from openai import OpenAI
 from pydantic import BaseModel, Field
 
 from app.agents.state import AgentState
+from app.llm_client import LLMClient
 
 logger = logging.getLogger(__name__)
 
@@ -15,7 +15,7 @@ class QueryRewriteDecision(BaseModel):
 
 def query_rewriter_node(
     state: AgentState,
-    openai_client: OpenAI,
+    llm_client: LLMClient,
     model_name: str,
 ) -> dict:
     original_query = state["query"]
@@ -41,19 +41,16 @@ Answer score:
 """
 
     try:
-        completion = openai_client.beta.chat.completions.parse(
-            model=model_name,
+        decision = llm_client.chat_completion(
             messages=[
                 {
                     "role": "system",
-                    "content": "You are a search query optimization expert.",
+                    "content": "You are a search query optimization expert. Return only valid JSON matching the schema.",
                 },
                 {"role": "user", "content": prompt},
             ],
             response_format=QueryRewriteDecision,
         )
-
-        decision = completion.choices[0].message.parsed
 
         return {
             "refined_query": decision.refined_query,

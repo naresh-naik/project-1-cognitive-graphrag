@@ -1,9 +1,9 @@
 import logging
 
-from openai import OpenAI
 from pydantic import BaseModel, Field
 
 from app.agents.state import AgentState
+from app.llm_client import LLMClient
 
 logger = logging.getLogger(__name__)
 
@@ -25,7 +25,7 @@ class AnswerGraderDecision(BaseModel):
 
 def context_grader_node(
     state: AgentState,
-    openai_client: OpenAI,
+    llm_client: LLMClient,
     model_name: str,
 ) -> dict:
     query = state.get("refined_query") or state["query"]
@@ -55,19 +55,17 @@ Context:
 """
 
     try:
-        completion = openai_client.beta.chat.completions.parse(
-            model=model_name,
+        decision = llm_client.chat_completion(
             messages=[
                 {
                     "role": "system",
-                    "content": "You are a strict retrieval quality grader.",
+                    "content": "You are a strict retrieval quality grader. Return only valid JSON matching the schema.",
                 },
                 {"role": "user", "content": prompt},
             ],
             response_format=ContextGraderDecision,
         )
 
-        decision = completion.choices[0].message.parsed
         score = "yes" if decision.relevant else "no"
 
         return {
@@ -86,7 +84,7 @@ Context:
 
 def generation_grader_node(
     state: AgentState,
-    openai_client: OpenAI,
+    llm_client: LLMClient,
     model_name: str,
 ) -> dict:
     query = state["query"]
@@ -123,38 +121,34 @@ Answer:
     answer_score = "yes"
 
     try:
-        completion = openai_client.beta.chat.completions.parse(
-            model=model_name,
+        decision = llm_client.chat_completion(
             messages=[
                 {
                     "role": "system",
-                    "content": "You are a hallucination detector.",
+                    "content": "You are a hallucination detector. Return only valid JSON matching the schema.",
                 },
                 {"role": "user", "content": hallucination_prompt},
             ],
             response_format=HallucinationGraderDecision,
         )
 
-        decision = completion.choices[0].message.parsed
         hallucination_score = "no" if decision.grounded else "yes"
 
     except Exception as error:
         logger.exception("Hallucination grading failed: %s", error)
 
     try:
-        completion = openai_client.beta.chat.completions.parse(
-            model=model_name,
+        decision = llm_client.chat_completion(
             messages=[
                 {
                     "role": "system",
-                    "content": "You are an answer relevance grader.",
+                    "content": "You are an answer relevance grader. Return only valid JSON matching the schema.",
                 },
                 {"role": "user", "content": answer_prompt},
             ],
             response_format=AnswerGraderDecision,
         )
 
-        decision = completion.choices[0].message.parsed
         answer_score = "yes" if decision.answers_query else "no"
 
     except Exception as error:

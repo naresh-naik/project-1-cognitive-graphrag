@@ -1,15 +1,14 @@
 import logging
 
-from openai import OpenAI
-
 from app.agents.state import AgentState
+from app.llm_client import LLMClient
 
 logger = logging.getLogger(__name__)
 
 
 def synthesizer_node(
     state: AgentState,
-    openai_client: OpenAI,
+    llm_client: LLMClient,
     model_name: str,
 ) -> dict:
     query = state["query"]
@@ -32,8 +31,7 @@ Context:
 """
 
     try:
-        completion = openai_client.chat.completions.create(
-            model=model_name,
+        response = llm_client.chat_completion(
             messages=[
                 {
                     "role": "system",
@@ -45,7 +43,7 @@ Context:
         )
 
         return {
-            "response": completion.choices[0].message.content,
+            "response": response,
         }
 
     except Exception as error:

@@ -67,14 +67,14 @@ def route_after_generation_grade(state: AgentState) -> str:
     return "rewrite_query"
 
 
-def build_workflow(openai_client, model_name: str, vector_store, graph_store):
+def build_workflow(llm_client, model_name: str, vector_store, graph_store):
     workflow = StateGraph(AgentState)
 
     workflow.add_node(
         "router",
         partial(
             query_router_node,
-            openai_client=openai_client,
+            llm_client=llm_client,
             model_name=model_name,
         ),
     )
@@ -92,7 +92,7 @@ def build_workflow(openai_client, model_name: str, vector_store, graph_store):
         "grade_context",
         partial(
             context_grader_node,
-            openai_client=openai_client,
+            llm_client=llm_client,
             model_name=model_name,
         ),
     )
@@ -101,7 +101,7 @@ def build_workflow(openai_client, model_name: str, vector_store, graph_store):
         "rewrite_query",
         partial(
             query_rewriter_node,
-            openai_client=openai_client,
+            llm_client=llm_client,
             model_name=model_name,
         ),
     )
@@ -110,7 +110,7 @@ def build_workflow(openai_client, model_name: str, vector_store, graph_store):
         "synthesize",
         partial(
             synthesizer_node,
-            openai_client=openai_client,
+            llm_client=llm_client,
             model_name=model_name,
         ),
     )
@@ -119,7 +119,7 @@ def build_workflow(openai_client, model_name: str, vector_store, graph_store):
         "grade_generation",
         partial(
             generation_grader_node,
-            openai_client=openai_client,
+            llm_client=llm_client,
             model_name=model_name,
         ),
     )
