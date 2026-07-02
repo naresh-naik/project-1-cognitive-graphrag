@@ -1,3 +1,12 @@
+---
+title: Cognitive GraphRAG
+emoji: 🧠
+colorFrom: blue
+colorTo: purple
+sdk: docker
+app_port: 7860
+---
+
 # Cognitive GraphRAG
 
 A FastAPI service that combines **vector search** (Qdrant) with **knowledge graph retrieval** (Neo4j) inside a LangGraph workflow. Documents are chunked, embedded, and converted into entities/relationships, then the cognitive agent routes each query through retrieval grading, synthesis, hallucination checking, and answer-relevancy scoring.
