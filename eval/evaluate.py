@@ -287,7 +287,7 @@ def run_evaluation() -> Dict[str, Any]:
     }
 
     results = {
-        "scores": score_dict,
+        **score_dict,
         "details": [
             {
                 "question": q,
@@ -308,7 +308,7 @@ def main() -> None:
         json.dump(results, results_file, indent=2, ensure_ascii=False)
 
     logger.info("Results written to %s", RESULTS_PATH)
-    print(json.dumps(results["scores"], indent=2, ensure_ascii=False))
+    print(json.dumps({k: results[k] for k in ["faithfulness", "answer_relevancy", "context_precision", "context_recall"]}, indent=2, ensure_ascii=False))
 
 
 if __name__ == "__main__":
