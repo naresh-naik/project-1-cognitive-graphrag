@@ -148,6 +148,80 @@ Expected response fields:
 | `QDRANT_PORT`       | gRPC/REST port for the Qdrant server.                     | `6333`                                |
 | `QDRANT_COLLECTION` | Name of the Qdrant collection for document chunks.        | `cognitive_graphrag_chunks`           |
 
+## Hugging Face Space Deployment
+
+The FastAPI app can also be deployed as a public, Docker-based Hugging Face Space. This lets others interact with the Cognitive GraphRAG API without running anything locally.
+
+### 1. Create the Space
+
+1. Go to [huggingface.co/spaces](https://huggingface.co/spaces) and click **Create new Space**.
+2. Choose a name such as `cognitive-graph-rag`.
+3. Select **Docker** as the Space SDK.
+4. Set the visibility to **Public** (or Private if you prefer).
+5. Click **Create Space**.
+
+### 2. Configure secrets
+
+In the Space settings, add the following secrets under **Variables and secrets**:
+
+| Variable            | Description                                         |
+|---------------------|-----------------------------------------------------|
+| `OPENAI_API_KEY`    | Your OpenAI API key.                                |
+| `NEO4J_URI`         | Bolt URI for the Neo4j instance.                    |
+| `NEO4J_USER`        | Neo4j username.                                     |
+| `NEO4J_PASSWORD`    | Neo4j password.                                     |
+| `QDRANT_URL`        | Qdrant server URL.                                  |
+| `QDRANT_API_KEY`    | Qdrant API key (if required by your instance).      |
+
+### 3. Push the code
+
+Clone the empty Space repository and copy the project files into it, then push:
+
+```bash
+git clone https://huggingface.co/spaces/<your-username>/cognitive-graph-rag
+cd cognitive-graph-rag
+# Copy project files (Dockerfile, app/, requirements.txt, etc.) into this directory
+git add .
+git commit -m "Deploy Cognitive GraphRAG FastAPI app"
+git push
+```
+
+Wait for the Space to build and start. Once the status indicator turns green, the API is live.
+
+### 4. Live Space link
+
+Replace `<your-username>` below with your Hugging Face username:
+
+```text
+https://huggingface.co/spaces/<your-username>/cognitive-graph-rag
+```
+
+### 5. API examples against the deployed Space
+
+Use the live Space URL in place of `http://localhost:8000`. The examples below assume the Space is public:
+
+#### Index a document
+
+```bash
+curl -X POST "https://<your-username>-cognitive-graph-rag.hf.space/index" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "title": "Quantum Research Lab",
+    "content": "Dr. Aris Thorne leads the Quantum Materials Division. The division develops superconducting qubits and integrates with the cryogenics team.",
+    "source": "manual"
+  }'
+```
+
+#### Query the index
+
+```bash
+curl -X POST "https://<your-username>-cognitive-graph-rag.hf.space/query" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "query": "Who leads the Quantum Materials Division?"
+  }'
+```
+
 ## Testing
 
 A pytest test suite will be added in Phase 3.
