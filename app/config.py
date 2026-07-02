@@ -15,7 +15,7 @@ class Settings(BaseSettings):
 
     GROQ_API_KEY: str = ""
     GROQ_BASE_URL: str = "https://api.groq.com/openai/v1"
-    GROQ_MODEL_NAME: str = "llama3-8b-8192"
+    GROQ_MODEL_NAME: str = "llama-3.1-8b-instant"
 
     EMBEDDING_PROVIDER: str = "openai"
     EMBEDDING_MODEL_NAME: str = "text-embedding-3-small"

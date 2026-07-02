@@ -178,7 +178,7 @@ In the Space settings, add the following secrets under **Variables and secrets**
 | `LLM_PROVIDER`        | LLM backend: `openai`, `huggingface`, or `groq`. Defaults to `openai`.      |
 | `OPENAI_API_KEY`      | Your OpenAI API key (required when `LLM_PROVIDER=openai`).                  |
 | `GROQ_API_KEY`        | Your Groq API key (required when `LLM_PROVIDER=groq`).                      |
-| `GROQ_MODEL_NAME`     | Groq model to use. Default: `llama3-8b-8192`.                               |
+| `GROQ_MODEL_NAME`     | Groq model to use. Default: `llama-3.1-8b-instant`.                         |
 | `EMBEDDING_PROVIDER`  | Embedding backend: `openai` or `local`. Default: `openai`.                  |
 | `USE_IN_MEMORY_STORES`| Set to `true` to use in-memory Neo4j/Qdrant fallbacks (no external DBs).   |
 | `NEO4J_URI`           | Bolt URI for the Neo4j instance.                                            |
@@ -194,7 +194,7 @@ Example free-tier secret set:
 ```text
 LLM_PROVIDER=groq
 GROQ_API_KEY=gsk_...
-GROQ_MODEL_NAME=llama3-8b-8192
+GROQ_MODEL_NAME=llama-3.1-8b-instant
 EMBEDDING_PROVIDER=local
 USE_IN_MEMORY_STORES=true
 OPENAI_API_KEY=dummy
