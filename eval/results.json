@@ -1,0 +1,58 @@
+{
+  "scores": {
+    "faithfulness": 0.0271,
+    "answer_relevancy": 0.4966,
+    "context_precision": 0.3633,
+    "context_recall": 0.8291
+  },
+  "details": [
+    {
+      "question": "What is GraphRAG and how does it improve retrieval?",
+      "answer": "Synthesis failed. Please inspect server logs.",
+      "contexts": [
+        "GraphRAG is a retrieval-augmented generation architecture that combines text indexing with knowledge graph construction. By extracting entities and relationships from source documents, GraphRAG can answer complex, multi-hop questions that traditional vector-only RAG systems struggle with. The approach was popularized by Microsoft Research as a way to improve global reasoning over private text corpora.",
+        "Cognitive GraphRAG is built around four core components: an embedding client, a vector store, a cognitive graph store, and a LangGraph-based agent workflow. Documents are chunked, embedded, and stored in a vector database while entities and relationships are written to a graph database such as Neo4j. The agent refines queries, retrieves context from both stores, and generates answers.",
+        "Knowledge graphs provide structured, interpretable representations of facts that complement the parametric knowledge stored in large language models. Integrating the two reduces hallucinations, improves explainability, and enables precise retrieval for domain-specific question answering.",
+        "Enterprise RAG systems connect internal documents to generative models so employees can ask natural-language questions without exposing data to third parties. Combining dense vector retrieval with structured knowledge graphs is a common pattern for improving accuracy and trust in enterprise deployments.",
+        "RAG evaluation frameworks such as RAGAS measure multiple dimensions of quality. Faithfulness checks whether the answer is supported by retrieved context, answer relevancy measures how well the answer addresses the question, context precision evaluates the signal-to-noise ratio of retrieved chunks, and context recall measures whether all information needed to answer the question is present in the context."
+      ],
+      "ground_truth": "GraphRAG is a retrieval-augmented generation architecture that builds a knowledge graph from source documents. It improves retrieval by enabling complex, multi-hop reasoning over entities and relationships."
+    },
+    {
+      "question": "What are the core components of the Cognitive GraphRAG architecture?",
+      "answer": "Synthesis failed. Please inspect server logs.",
+      "contexts": [
+        "GraphRAG is a retrieval-augmented generation architecture that combines text indexing with knowledge graph construction. By extracting entities and relationships from source documents, GraphRAG can answer complex, multi-hop questions that traditional vector-only RAG systems struggle with. The approach was popularized by Microsoft Research as a way to improve global reasoning over private text corpora.",
+        "Cognitive GraphRAG is built around four core components: an embedding client, a vector store, a cognitive graph store, and a LangGraph-based agent workflow. Documents are chunked, embedded, and stored in a vector database while entities and relationships are written to a graph database such as Neo4j. The agent refines queries, retrieves context from both stores, and generates answers.",
+        "Knowledge graphs provide structured, interpretable representations of facts that complement the parametric knowledge stored in large language models. Integrating the two reduces hallucinations, improves explainability, and enables precise retrieval for domain-specific question answering.",
+        "Enterprise RAG systems connect internal documents to generative models so employees can ask natural-language questions without exposing data to third parties. Combining dense vector retrieval with structured knowledge graphs is a common pattern for improving accuracy and trust in enterprise deployments.",
+        "RAG evaluation frameworks such as RAGAS measure multiple dimensions of quality. Faithfulness checks whether the answer is supported by retrieved context, answer relevancy measures how well the answer addresses the question, context precision evaluates the signal-to-noise ratio of retrieved chunks, and context recall measures whether all information needed to answer the question is present in the context."
+      ],
+      "ground_truth": "The core components are an embedding client, a vector store, a cognitive graph store, and a LangGraph-based agent workflow."
+    },
+    {
+      "question": "Why are knowledge graphs useful when combined with large language models?",
+      "answer": "Synthesis failed. Please inspect server logs.",
+      "contexts": [
+        "GraphRAG is a retrieval-augmented generation architecture that combines text indexing with knowledge graph construction. By extracting entities and relationships from source documents, GraphRAG can answer complex, multi-hop questions that traditional vector-only RAG systems struggle with. The approach was popularized by Microsoft Research as a way to improve global reasoning over private text corpora.",
+        "Cognitive GraphRAG is built around four core components: an embedding client, a vector store, a cognitive graph store, and a LangGraph-based agent workflow. Documents are chunked, embedded, and stored in a vector database while entities and relationships are written to a graph database such as Neo4j. The agent refines queries, retrieves context from both stores, and generates answers.",
+        "Knowledge graphs provide structured, interpretable representations of facts that complement the parametric knowledge stored in large language models. Integrating the two reduces hallucinations, improves explainability, and enables precise retrieval for domain-specific question answering.",
+        "Enterprise RAG systems connect internal documents to generative models so employees can ask natural-language questions without exposing data to third parties. Combining dense vector retrieval with structured knowledge graphs is a common pattern for improving accuracy and trust in enterprise deployments.",
+        "RAG evaluation frameworks such as RAGAS measure multiple dimensions of quality. Faithfulness checks whether the answer is supported by retrieved context, answer relevancy measures how well the answer addresses the question, context precision evaluates the signal-to-noise ratio of retrieved chunks, and context recall measures whether all information needed to answer the question is present in the context."
+      ],
+      "ground_truth": "Knowledge graphs reduce hallucinations, improve explainability, and enable precise retrieval for domain-specific question answering."
+    },
+    {
+      "question": "What RAGAS metrics are commonly used to evaluate RAG systems?",
+      "answer": "Synthesis failed. Please inspect server logs.",
+      "contexts": [
+        "GraphRAG is a retrieval-augmented generation architecture that combines text indexing with knowledge graph construction. By extracting entities and relationships from source documents, GraphRAG can answer complex, multi-hop questions that traditional vector-only RAG systems struggle with. The approach was popularized by Microsoft Research as a way to improve global reasoning over private text corpora.",
+        "Cognitive GraphRAG is built around four core components: an embedding client, a vector store, a cognitive graph store, and a LangGraph-based agent workflow. Documents are chunked, embedded, and stored in a vector database while entities and relationships are written to a graph database such as Neo4j. The agent refines queries, retrieves context from both stores, and generates answers.",
+        "Knowledge graphs provide structured, interpretable representations of facts that complement the parametric knowledge stored in large language models. Integrating the two reduces hallucinations, improves explainability, and enables precise retrieval for domain-specific question answering.",
+        "Enterprise RAG systems connect internal documents to generative models so employees can ask natural-language questions without exposing data to third parties. Combining dense vector retrieval with structured knowledge graphs is a common pattern for improving accuracy and trust in enterprise deployments.",
+        "RAG evaluation frameworks such as RAGAS measure multiple dimensions of quality. Faithfulness checks whether the answer is supported by retrieved context, answer relevancy measures how well the answer addresses the question, context precision evaluates the signal-to-noise ratio of retrieved chunks, and context recall measures whether all information needed to answer the question is present in the context."
+      ],
+      "ground_truth": "Common RAGAS metrics include faithfulness, answer relevancy, context precision, and context recall."
+    }
+  ]
+}

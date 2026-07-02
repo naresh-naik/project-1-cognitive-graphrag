@@ -49,6 +49,11 @@ Context:
     except Exception as error:
         logger.exception("Synthesis failed: %s", error)
 
+        # When the LLM provider is unavailable or rate-limited, fall back to
+        # returning the retrieved context so the endpoint remains useful.
+        fallback_response = context or "No context available."
+        if isinstance(fallback_response, list):
+            fallback_response = "\n\n".join(str(item) for item in fallback_response)
         return {
-            "response": "Synthesis failed. Please inspect server logs.",
+            "response": f"(LLM synthesis unavailable; returning retrieved context)\n\n{fallback_response}",
         }
