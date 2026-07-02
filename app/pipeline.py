@@ -1,4 +1,5 @@
 import logging
+import os
 from typing import Any, Dict, List
 
 from openai import OpenAI
@@ -7,6 +8,8 @@ from pydantic import BaseModel, Field
 from app.agents.graph_builder import build_workflow
 from app.config import settings
 from app.graph_store import CognitiveGraphStore
+from app.in_memory_graph_store import InMemoryCognitiveGraphStore
+from app.in_memory_vector_store import InMemoryCognitiveVectorStore
 from app.vector_store import CognitiveVectorStore
 
 logger = logging.getLogger(__name__)
@@ -34,19 +37,28 @@ class CognitiveGraphRAGPipeline:
     def __init__(self):
         self.openai_client = OpenAI(api_key=settings.OPENAI_API_KEY)
 
-        self.graph_store = CognitiveGraphStore(
-            uri=settings.NEO4J_URI,
-            username=settings.NEO4J_USERNAME,
-            password=settings.NEO4J_PASSWORD,
-        )
+        use_in_memory = os.environ.get("USE_IN_MEMORY_STORES", "").lower() in ("1", "true", "yes")
 
-        self.vector_store = CognitiveVectorStore(
-            host=settings.QDRANT_HOST,
-            port=settings.QDRANT_PORT,
-            collection_name=settings.QDRANT_COLLECTION,
-            openai_api_key=settings.OPENAI_API_KEY,
-            embedding_model=settings.EMBEDDING_MODEL_NAME,
-        )
+        if use_in_memory:
+            self.graph_store = InMemoryCognitiveGraphStore()
+            self.vector_store = InMemoryCognitiveVectorStore(
+                openai_api_key=settings.OPENAI_API_KEY,
+                embedding_model=settings.EMBEDDING_MODEL_NAME,
+            )
+        else:
+            self.graph_store = CognitiveGraphStore(
+                uri=settings.NEO4J_URI,
+                username=settings.NEO4J_USERNAME,
+                password=settings.NEO4J_PASSWORD,
+            )
+
+            self.vector_store = CognitiveVectorStore(
+                host=settings.QDRANT_HOST,
+                port=settings.QDRANT_PORT,
+                collection_name=settings.QDRANT_COLLECTION,
+                openai_api_key=settings.OPENAI_API_KEY,
+                embedding_model=settings.EMBEDDING_MODEL_NAME,
+            )
 
         self.workflow = build_workflow(
             openai_client=self.openai_client,
